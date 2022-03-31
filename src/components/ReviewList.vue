@@ -206,26 +206,26 @@
 					console.log("进行表单验证")
 					if (valid) {
 						console.log('验证通过');
-						console.log('id'+proxy.bookInfo.book_id)
-						if(proxy.book_id!=''||proxy.book_id!=null){
-							proxy.bookInfo.book_id = Number(proxy.book_id)
+						console.log('id'+proxy.reviewInfo.review_id)
+						if(proxy.review_id!=''||proxy.review_id!=null){
+							proxy.reviewInfo.review_id = Number(proxy.review_id)
 						}else{
-							proxy.bookInfo.book_id = 4;
+							proxy.reviewInfo.review_id = 4;
 						}
-						var bookData = Qs.stringify(proxy.bookInfo);
-						console.log("no"+proxy.book_id)
-						proxy.$axios.post('api/book/upload', bookData).then(res => {
+						var reviewData = Qs.stringify(proxy.reviewInfo);
+						console.log("no"+proxy.review_id)
+						proxy.$axios.post('api/review/upload', reviewData).then(res => {
 							setTimeout(() => {
 								if (res.data.code == 200 && res.data.data != null) {
-									if (proxy.book_id != null || proxy.book_id != '') {
+									if (proxy.review_id != null || proxy.review_id != '') {
 										console.log('添加商品 ');
 										proxy.dialogTableVisible = false
 									} else {
 										console.log('修改商品信息');
 									}
-									proxy.resetBookInfo(proxy)
+									proxy.resetReviewInfo(proxy)
 									// proxy.user_id = 0;
-									proxy.getBookList(proxy)
+									proxy.getReviewList(proxy)
 								} else {
 									alert(res.data.msg);
 								}
@@ -240,15 +240,15 @@
 			},
 			handleCancel(proxy) {
 				proxy.dialogTableVisible = false;
-				proxy.resetBookInfo(proxy)
+				proxy.resetreviewInfo(proxy)
 			},
-			resetBookInfo(proxy){
-				proxy.bookInfo ={
+			resetReviewInfo(proxy){
+				proxy.reviewInfo ={
+					user_id: '',
+					review_id: '',
+					review_rate:'',
+					review_content:'',
 					book_id: '',
-					book_title: '',
-					book_img:'',
-					book_category:'',
-					book_author: '',
 				}
 			},
 		}

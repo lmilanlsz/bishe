@@ -81,6 +81,6 @@ export default {
 		padding 0
 		margin 0
 		margin-top 100px
-		.el-menu
-			border-right 0
+	.el-menu
+		border-right 0
 </style>

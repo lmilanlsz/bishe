@@ -3,7 +3,12 @@
 	<div style="width: 100%; background-color: white;">
 		<el-button @click="handleAdd(proxy)" type="primary">添加图书</el-button>
 	</div>
-	<el-table :data="book" style="width: 100%;">
+	<el-table 
+		:data="book.slice((currentPage - 1) * pagesize, currentPage * pagesize)" 
+		style="width: 100%;"  
+		:default-sort = "{prop: 'book_id', order: 'aescending'}"
+		stripe=true
+		>
 		<el-table-column prop="book_id" label="图书编号" width="160"></el-table-column>
 		<el-table-column prop="book_img" label="图书图片" width="160">
 			<template class="demo-image" #default="scope">
@@ -36,8 +41,8 @@
 					<el-button size="small" @click="handleRefund(scope.$index, scope.row, proxy)">退款</el-button>
 				</template> -->
 				<template v-if="scope.row.book_status != 1">
-					<el-button size="small" type="primary" @click="handleEdit(scope.$index, scope.row, proxy)" disabled="true">编辑</el-button>
-					<el-button size="small" type="danger" @click="handleDelete(scope.$index, scope.row, proxy)" disabled="true">留档</el-button>
+					<el-button size="small" type="primary" @click="handleEdit(scope.$index, scope.row, proxy)" disabled=true>编辑</el-button>
+					<el-button size="small" type="danger" @click="handleDelete(scope.$index, scope.row, proxy)" disabled=true>留档</el-button>
 				</template>
 				<template v-else>
 					<el-button size="small" type="primary" @click="handleEdit(scope.$index, scope.row, proxy)">编辑</el-button>
@@ -51,6 +56,14 @@
 			</template> -->
 		</el-table-column>
 	</el-table>
+	<el-pagination 
+		class="pagination"
+	    layout="prev, pager, next"
+	    @current-change="current_change"
+	    :total=100
+	    background=true
+	    >
+	</el-pagination>
 	<el-dialog title="编辑图书信息" v-model="dialogTableVisible" center width="27%">
 		<el-form ref="bookInfo" :model="bookInfo" :rules="rules" :label-position="right" label-width="80px">
 			<el-form-item label="图书编号" prop="book_id">
@@ -119,6 +132,9 @@
 		data(){
 			
 			return{
+				total: 1000,//默认数据总数
+				pagesize: 5,//每页的数据条数
+				currentPage: 1,//默认开始页面
 				dialogTableVisible: false,
 				book:[],
 				imageUrl:'',
@@ -160,7 +176,13 @@
 				console.log(res.data);
 			});
 		},
+		created: function(){
+		         this.total=this.book.length;
+		},
 		methods:{
+			current_change:function(currentPage){
+			    this.currentPage = currentPage;
+			},
 			handleAvatarSuccess(res, file) {
 			    this.imageUrl = URL.createObjectURL(file.raw);
 				console.log(this.imageUrl);
@@ -289,6 +311,9 @@
 	  color: #8c939d;
 	  width: 178px;
 	  height: 178px;
+	  text-align: center;
+	}
+	.el-pagination{
 	  text-align: center;
 	}
 </style>

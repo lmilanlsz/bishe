@@ -97,7 +97,7 @@
 		margin 0
 	.el-aside
 		background-color #545c64
-		min-height 500%
+		min-height 100%
 		min-width 20%
 		padding 0
 		margin 0
