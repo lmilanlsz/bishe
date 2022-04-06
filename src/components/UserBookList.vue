@@ -1,111 +1,104 @@
 <template>
-	<div class="BookList">
-	<div style="width: 100%; background-color: white;">
-		<el-button @click="handleAdd(proxy)" type="primary">添加图书</el-button>
-	</div>
-	<el-table 
-		:data="book.slice((currentPage - 1) * pagesize, currentPage * pagesize)" 
-		style="width: 100%;"  
-		:default-sort = "{prop: 'book_id', order: 'aescending'}"
-		stripe=true
-		>
-		<el-table-column prop="book_id" label="图书编号" width="160"></el-table-column>
-		<el-table-column prop="book_img" label="图书图片" width="160">
-			<template class="demo-image" #default="scope">
-			    <div :key="fill" class="block">
-			      <el-image style="width: 100px; height: 100px" :src="require('@/assets/img/' + scope.row.book_img)" :fit="fill" />
-			    </div>
-			</template>
-		</el-table-column>
-		<el-table-column prop="book_title" label="图书标题" width="160"></el-table-column>
-		<el-table-column prop="book_author" label="图书作者" width="160"></el-table-column>
-		<el-table-column prop="book_category" label="图书类别" width="160"></el-table-column>
-		<el-table-column prop="book_rate" label="图书评分" width="160">
-			<template #default="scope">
-			  <el-rate
-			    v-model="scope.row.book_rate"
-			    disabled
-			    show-score
-			    text-color="#ff9900"
-			  />
-			</template>
-		</el-table-column>
-		<el-table-column label="操作">
-			<template #default="scope">
-				<template v-if="scope.row.book_status != 1">
-					<el-button size="small" type="primary" @click="handleEdit(scope.$index, scope.row, proxy)" disabled=true>编辑</el-button>
-					<el-button size="small" type="danger" @click="handleDelete(scope.$index, scope.row, proxy)" disabled=true>留档</el-button>
+	<div id="UserBookList">
+		<el-table
+		
+			:data="filterData(book.slice((currentPage - 1) * pagesize, currentPage * pagesize), search)" 
+			style="width: 100%;"  
+			:default-sort = "{prop: 'book_id', order: 'aescending'}"
+			stripe
+			>
+			<el-table-column prop="book_id" label="图书编号" width="160"></el-table-column>
+			<el-table-column prop="book_img" label="图书图片" width="160">
+				<template class="demo-image" #default="scope">
+				    <div :key="fill" class="block">
+				      <el-image  @click="handleDetail(scope.$index, scope.row, proxy)" style="width: 100px; height: 100px" :src="require('@/assets/img/' + scope.row.book_img)" :fit="fill" />
+				    </div>
 				</template>
-				<template v-else>
-					<el-button size="small" type="primary" @click="handleEdit(scope.$index, scope.row, proxy)">编辑</el-button>
-					<el-button size="small" type="danger" @click="handleDelete(scope.$index, scope.row, proxy)">删除</el-button>
+			</el-table-column>
+			<el-table-column prop="book_title" label="图书标题" width="160"></el-table-column>
+			<el-table-column prop="book_author" label="图书作者" width="160"></el-table-column>
+			<el-table-column prop="book_category" label="图书类别" width="160"></el-table-column>
+			<el-table-column prop="book_rate" label="图书评分" width="160">
+				<template #default="scope">
+				  <el-rate
+				    v-model="scope.row.book_rate"
+				    disabled
+				    show-score
+				    text-color="#ff9900"
+				  />
 				</template>
-			</template>
-		</el-table-column>
-	</el-table>
-	<el-pagination 
-		class="pagination"
-	    layout="prev, pager, next"
-	    @current-change="current_change"
-	    :total=100
-	    background=true
-	    >
-	</el-pagination>
-	<el-dialog title="编辑图书信息" v-model="dialogTableVisible" center width="27%">
-		<el-form ref="bookInfo" :model="bookInfo" :rules="rules" :label-position="right" label-width="80px">
-			<el-form-item label="图书编号" prop="book_id">
-				<el-input v-model="bookInfo.book_id"></el-input>
-			</el-form-item>
-			<el-form-item label="图书标题" prop="book_title">
-			<el-input
-			      name="book_title"
-			      type="text"
-				  @keyup.enter.native="onSubmit"
-			      v-model="bookInfo.book_title"
-			      autocomplete="on"
-			  >
-			  </el-input>
-			</el-form-item>
-			<el-form-item label="图书作者" prop="book_author">
-			  <el-input
-			      name="book_author"
-			      type="text"
-			      @keyup.enter.native="onSubmit"
-			      v-model="bookInfo.book_author"
-			      autocomplete="on"
-			  >
-			  </el-input>
-			</el-form-item>
-			<el-form-item label="图书图片" prop="book_img">
-			  <template #default="scope">
-			   <el-upload
-			     class="avatar-uploader"
-			     action='api/book/list'
-			     :show-file-list="false"
-			     :on-success="handleAvatarSuccess"
-			     :before-upload="beforeAvatarUpload"
-			   >
-			     <img v-if="imageUrl" :src="imageUrl" class="avatar" />
-			     <el-icon v-else class="avatar-uploader-icon"><Plus /></el-icon>
-			    </el-upload>
-			  </template>
-			</el-form-item>
-			<el-form-item label="图书类别" prop="book_category">
+			</el-table-column>
+			
+			<el-table-column align="right">
+				<template #header>
+				        <el-input v-model="search" size="small" placeholder="Type to search" />
+				</template>
+			</el-table-column>
+		</el-table>
+		<el-pagination 
+			class="pagination"
+		    layout="prev, pager, next"
+		    @current-change="current_change"
+		    :total=100
+		    background=true
+			hide-on-single-page
+		    >
+		</el-pagination>
+		<el-dialog title="编辑图书信息" v-model="dialogTableVisible" center width="27%">
+			<el-form ref="bookInfo" :model="bookInfo" :rules="rules" :label-position="right" label-width="80px">
+				<el-form-item label="图书编号" prop="book_id">
+					<el-input v-model="bookInfo.book_id"></el-input>
+				</el-form-item>
+				<el-form-item label="图书标题" prop="book_title">
 				<el-input
-				    name="book_category"
-				    type="text"
-				    @keyup.enter.native="onSubmit"
-				    v-model="bookInfo.book_category"
-				    autocomplete="on"
-				>
-				</el-input>
-			</el-form-item>
-			<el-form-item size="large">
-				<el-button type="primary" @click="onSubmit('bookInfo', proxy)" style="margin-right: 10%;">确定</el-button>
-				<el-button @click="handleCancel(proxy)" style="margin-right: 20%;">取消</el-button>
-			</el-form-item>
-		</el-form>
-	</el-dialog>
+				      name="book_title"
+				      type="text"
+					  @keyup.enter.native="onSubmit"
+				      v-model="bookInfo.book_title"
+				      autocomplete="on"
+				  >
+				  </el-input>
+				</el-form-item>
+				<el-form-item label="图书作者" prop="book_author">
+				  <el-input
+				      name="book_author"
+				      type="text"
+				      @keyup.enter.native="onSubmit"
+				      v-model="bookInfo.book_author"
+				      autocomplete="on"
+				  >
+				  </el-input>
+				</el-form-item>
+				<el-form-item label="图书图片" prop="book_img">
+				  <template #default="scope">
+				   <el-upload
+				     class="avatar-uploader"
+				     action='api/book/list'
+				     :show-file-list="false"
+				     :on-success="handleAvatarSuccess"
+				     :before-upload="beforeAvatarUpload"
+				   >
+				     <img v-if="imageUrl" :src="imageUrl" class="avatar" />
+				     <el-icon v-else class="avatar-uploader-icon"><Plus /></el-icon>
+				    </el-upload>
+				  </template>
+				</el-form-item>
+				<el-form-item label="图书类别" prop="book_category">
+					<el-input
+					    name="book_category"
+					    type="text"
+					    @keyup.enter.native="onSubmit"
+					    v-model="bookInfo.book_category"
+					    autocomplete="on"
+					>
+					</el-input>
+				</el-form-item>
+				<el-form-item size="large">
+					<el-button type="primary" @click="onSubmit('bookInfo', proxy)" style="margin-right: 10%;">确定</el-button>
+					<el-button @click="handleCancel(proxy)" style="margin-right: 20%;">取消</el-button>
+				</el-form-item>
+			</el-form>
+		</el-dialog>
 	</div>
 </template>
 
@@ -117,12 +110,12 @@
 		name: 'BookList',
 		components: { User, Plus },
 		data(){
-			
 			return{
 				total: 1000,//默认数据总数
 				pagesize: 5,//每页的数据条数
 				currentPage: 1,//默认开始页面
 				dialogTableVisible: false,
+				search: '',
 				book:[],
 				imageUrl:'',
 				bookInfo: {
@@ -167,6 +160,24 @@
 		         this.total=this.book.length;
 		},
 		methods:{
+			filterData(data,searchContent) {
+			      //var input = this.searchContent && this.searchContent.toLowerCase();
+			      var input = searchContent.toLowerCase()
+			      var items = data;
+			      var items1;
+			      if (input) {
+			        items1 = items.filter(function(item) {
+			          return Object.keys(item).some(function(key1) {
+			            return String(item[key1])
+			              .toLowerCase()
+			              .match(input);
+			          });
+			        });
+			      } else {
+			        items1 = items;
+			      }
+			      return items1;
+			    },
 			current_change:function(currentPage){
 			    this.currentPage = currentPage;
 			},
@@ -194,6 +205,11 @@
 				proxy.bookInfo = JSON.parse(JSON.stringify(row));
 				console.log(proxy.bookInfo)
 				proxy.dialogTableVisible = true;
+			},
+			handleDetail(index, row, proxy) {
+				proxy.$router.push('/bookdetail');
+				proxy.$store.state.book_id = row.book_id;
+				console.log(proxy.$store.state.book_id)
 			},
 			handleDelete(index, row, proxy) {
 				console.log(index, row);
@@ -304,3 +320,4 @@
 	  text-align: center;
 	}
 </style>
+

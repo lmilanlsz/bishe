@@ -83,7 +83,7 @@ export default {
 	  };
     return {
       loginForm: {
-        username: "admin",
+        username: "hkc",
         password: "12345"
       },
       loading: false,
@@ -167,6 +167,9 @@ export default {
 				if (res.data.code == 200 && res.data.msg != null) {
 					proxy.$store.state.token = res.data.msg;
 					proxy.$store.state.user = res.data.data;
+					proxy.$store.state.user_id = res.data.data.user_id;
+					proxy.$store.state.user_pwd = res.data.data.user_pwd;
+					console.log("token" + proxy.$store.state.user_id)
 					console.log("token" + proxy.$store.state.token)
 					proxy.$router.push('/mainpage')
 					console.log("设置token")

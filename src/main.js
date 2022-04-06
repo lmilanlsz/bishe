@@ -6,6 +6,8 @@ import ElementPlus from 'element-plus'
 import 'element-plus/lib/theme-chalk/index.css';
 import axios from 'axios'
 import * as echarts from 'echarts'
+import moment from 'moment'
+
 
 axios.defaults.retry = 4;
 axios.defaults.retryDelay = 1000;

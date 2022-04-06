@@ -1,0 +1,285 @@
+<template>
+	<div id="UserReview">
+		<el-table :data="filterData(review, search)" 
+			style="width: 75%;margin-left: 10%;margin-top: 5%;" 
+			border
+			:default-sort="{ prop: 'review_date', order: 'ascending' }"
+			stripe>
+			<el-table-column prop="review_id" label="评价编号" width="160px"></el-table-column>
+			<el-table-column prop="book_id" label="图书编号" width="160px"></el-table-column>
+			<el-table-column prop="book_title" label="图书标题" width="250px"></el-table-column>
+			<el-table-column prop="review_rate" label="评价分数" width="250px">
+				<template #default="scope">
+				  <el-rate
+				    v-model="scope.row.review_rate"
+				    disabled
+				    show-score
+				    text-color="#ff9900"
+				  />
+				</template>
+			</el-table-column>
+			<el-table-column prop="review_content" label="评价内容" width="300px"></el-table-column>
+			<el-table-column prop="review_date" label="评价时间" width="250px" :formatter="dateFormat" sortable></el-table-column>
+			<el-table-column align="right">
+				<template #header>
+				        <el-input v-model="search" size="small" placeholder="Type to search" />
+				</template>
+				<template #default="scope">
+						<el-button size="small" type="primary" @click="handleEdit(scope.$index, scope.row, proxy)">编辑</el-button>
+						<el-button size="small" type="danger" @click="handleDelete(scope.$index, scope.row, proxy)">删除</el-button>
+				</template>
+			</el-table-column>
+		</el-table>
+		<el-dialog title="编辑评价信息" v-model="dialogTableVisible" center width="27%">
+			<el-form ref="reviewInfo" :model="reviewInfo" :rules="rules" :label-position="right" label-width="80px">
+				<el-form-item label="评价编号" prop="review_id">
+					<el-input v-model="reviewInfo.review_id"></el-input>
+				</el-form-item>
+				<el-form-item label="用户编号" prop="user_id">
+				<el-input
+				      name="user_id"
+				      type="text"
+					  @keyup.enter.native="onSubmit"
+				      v-model="reviewInfo.user_id"
+				      autocomplete="on"
+				  >
+				  </el-input>
+				</el-form-item>
+				<el-form-item label="图书编号" prop="book_id">
+				  <el-input
+				      name="book_id"
+				      type="text"
+				      @keyup.enter.native="onSubmit"
+				      v-model="reviewInfo.book_id"
+				      autocomplete="on"
+				  >
+				  </el-input>
+				</el-form-item>
+				<el-form-item label="评价分数" prop="review_rate">
+				  <el-input
+				      name="review_rate"
+				      type="text"
+				      @keyup.enter.native="onSubmit"
+				      v-model="reviewInfo.review_rate"
+				      autocomplete="on"
+				  >
+				  </el-input>
+				</el-form-item>
+				<el-form-item label="评价内容" prop="review_content">
+					<el-input
+					    name="review_content"
+					    type="text"
+					    @keyup.enter.native="onSubmit"
+					    v-model="reviewInfo.review_content"
+					    autocomplete="on"
+					>
+					</el-input>
+				</el-form-item>
+				<el-form-item size="large">
+					<el-button type="primary" @click="onSubmit('reviewInfo', proxy)" style="margin-right: 10%;">确定</el-button>
+					<el-button @click="handleCancel(proxy)" style="margin-right: 20%;">取消</el-button>
+				</el-form-item>
+			</el-form>
+		</el-dialog>
+	</div>
+</template>
+
+<script>
+	import { getCurrentInstance } from 'vue';
+	import Qs from 'qs';
+	import moment from 'moment';
+	export default {
+		name: "UserReview",
+		data() {
+			return {
+				dialogTableVisible: false,
+				review:[],
+				imageUrl:'',
+				reviewInfo: {
+					user_id: '',
+					review_id: '',
+					review_rate:'',
+					review_content:'',
+					book_id: '',
+				},
+				search: '',
+				rules: {
+					user_id: [
+						{ required:true, message: '用户编号不能为空', trigger: 'blur' },
+					],
+					review_rate: [
+						{ required:true, message: '评价评分不能为空', trigger: 'blur' },
+					],
+					review_content: [
+						{ required:true, message: '评价内容不能为空', trigger: 'blur' },
+					],
+					book_id: [
+						{ required:true, message: '图书编号不能为空', trigger: 'blur' },
+					],
+				}
+			}
+		},
+		setup() {
+			const { proxy } = getCurrentInstance(); // 使用proxy代替ctx，因为ctx只在开发环境有效
+			return {
+				proxy
+			};
+		},
+		mounted() {
+			const { proxy } = getCurrentInstance();
+			var user_id = Qs.stringify({"user_id": proxy.$store.state.user_id});
+			proxy.$axios.post('api/user/review', user_id).then(res => {
+				proxy.review = res.data.data;
+				console.log('review' + proxy.$store.state.token);
+				console.log(res.data);
+			});
+		},
+		methods: {
+			filterData(data,searchContent) {
+			      //var input = this.searchContent && this.searchContent.toLowerCase();
+			      var input = searchContent.toLowerCase()
+			      var items = data;
+			      var items1;
+			      if (input) {
+			        items1 = items.filter(function(item) {
+			          return Object.keys(item).some(function(key1) {
+			            return String(item[key1])
+			              .toLowerCase()
+			              .match(input);
+			          });
+			        });
+			      } else {
+			        items1 = items;
+			      }
+			      return items1;
+			    },
+			dateFormat:function(row,column){
+			        var date = row[column.property];
+			        if(date == undefined){return ''};
+			        return moment(date).format("YYYY-MM-DD HH:mm:ss");
+			},
+			handleAvatarSuccess(res, file) {
+			    this.imageUrl = URL.createObjectURL(file.raw);
+				console.log(this.imageUrl);
+			},
+			beforeAvatarUpload(file) {
+			    const isJPG = file.type === 'image/jpeg';
+			    const isLt2M = file.size / 1024 / 1024 < 2;
+			
+			    if (!isJPG) {
+			        this.$message.error('上传头像图片只能是 JPG 格式!');
+			    }
+			    if (!isLt2M) {
+			        this.$message.error('上传头像图片大小不能超过 2MB!');
+			    }
+			        return isJPG && isLt2M;
+			},
+			handleAdd(proxy){
+				proxy.dialogTableVisible = true;
+			},
+			handleEdit(index, row, proxy) {
+				proxy.review_id = row.review_id;
+				proxy.reviewInfo = JSON.parse(JSON.stringify(row));
+				console.log(proxy.reviewInfo)
+				proxy.dialogTableVisible = true;
+			},
+			handleDelete(index, row, proxy) {
+				console.log(index, row);
+				console.log(proxy);
+				proxy.$axios.get('api/review/delete',
+				{params:{
+					no:row.review_id
+				}}).then(res => {
+					setTimeout(()=>{
+						alert(res.data.msg)
+						if(res.data.code==200 && res.data.data!=null){
+							proxy.getReviewList(proxy)
+						}
+					},1000)
+				})
+			},
+			getReviewList(proxy){
+				var user_id = Qs.stringify({"user_id": proxy.$store.state.user_id});
+				proxy.$axios.post('api/user/review', user_id).then(res => {
+					proxy.review = res.data.data;
+					console.log('review' + proxy.$store.state.token);
+					console.log(res.data);
+				});
+			},
+			onSubmit(formName, proxy) {
+				console.log("提交表单")
+				this.$refs[formName].validate(valid => {
+					console.log("进行表单验证")
+					if (valid) {
+						console.log('验证通过');
+						console.log('id'+proxy.reviewInfo.review_id)
+						if(proxy.review_id!=''||proxy.review_id!=null){
+							proxy.reviewInfo.review_id = Number(proxy.review_id)
+						}else{
+							proxy.reviewInfo.review_id = 4;
+						}
+						var reviewData = Qs.stringify(proxy.reviewInfo);
+						console.log("no"+proxy.review_id)
+						proxy.$axios.post('api/review/upload', reviewData).then(res => {
+							setTimeout(() => {
+								if (res.data.code == 200 && res.data.data != null) {
+									if (proxy.review_id != null || proxy.review_id != '') {
+										console.log('添加商品 ');
+										proxy.dialogTableVisible = false
+									} else {
+										console.log('修改商品信息');
+									}
+									proxy.resetReviewInfo(proxy)
+									// proxy.user_id = 0;
+									proxy.getReviewList(proxy)
+								} else {
+									alert(res.data.msg);
+								}
+							}, 1000);
+						});
+					} else {
+						console.log("输入非法")
+						alert('请检查输入是否合法');
+						return false;
+					}
+				});
+			},
+			handleCancel(proxy) {
+				proxy.dialogTableVisible = false;
+				proxy.resetreviewInfo(proxy)
+			},
+			resetReviewInfo(proxy){
+				proxy.reviewInfo ={
+					user_id: '',
+					review_id: '',
+					review_rate:'',
+					review_content:'',
+					book_id: '',
+				}
+			},
+		}
+	}
+</script>
+
+<style scoped="scoped">
+	.avatar-uploader .el-upload {
+	  border: 1px dashed #d9d9d9;
+	  border-radius: 6px;
+	  cursor: pointer;
+	  position: relative;
+	  overflow: hidden;
+	  transition: var(--el-transition-duration-fast);
+	}
+	
+	.avatar-uploader .el-upload:hover {
+	  border-color: var(--el-color-primary);
+	}
+	
+	.el-icon.avatar-uploader-icon {
+	  font-size: 28px;
+	  color: #8c939d;
+	  width: 178px;
+	  height: 178px;
+	  text-align: center;
+	}
+</style>

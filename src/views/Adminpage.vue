@@ -19,18 +19,17 @@
 <script>
 	import AdminNavi from '../components/AdminNavi.vue';
 	import BookList from '../components/BookList.vue';
-	import GoodsList from '../components/GoodsList.vue';
 	import UserList from '../components/UserList.vue'
 	import Report from '../components/Report.vue'
 	import ReviewList from '../components/ReviewList.vue'
 	import { getCurrentInstance } from 'vue';
+	import Qs from 'qs';
 	let proxy;
 	export default {
 		name: 'Adminpage',
 		components: {
 			AdminNavi,
 			BookList,
-			GoodsList,
 			UserList,
 			Report,
 			ReviewList
@@ -45,6 +44,11 @@
 			return {
 				comName: 'UserList',
 			};
+		},
+		mounted() {
+			const {
+				proxy
+			} = getCurrentInstance();
 		},
 		methods:{
 			changeCom:function(msg){

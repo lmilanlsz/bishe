@@ -14,24 +14,11 @@
 				</template>
 			</template>
 		</el-table-column>
-		<!-- <el-table-column prop="type" label="操作类型" width="160"></el-table-column>
-		<el-table-column prop="time" label="操作时间"></el-table-column> -->
 		<el-table-column label="操作">
 			<template #default="scope">
-				<!-- <template v-if="(Date.parse(scope.row.time)<new Date()-3*24*60*60*1000)||scope.row.type != '销售'">
-					<el-button size="small" @click="handleRefund(scope.$index, scope.row, proxy)" disabled="true">退款</el-button>
-				</template>
-				<template v-else>
-					<el-button size="small" @click="handleRefund(scope.$index, scope.row, proxy)">退款</el-button>
-				</template> -->
 				<el-button size="small" type="primary" @click="handleEdit(scope.$index, scope.row, proxy)">编辑</el-button>
 				<el-button size="small" type="danger" @click="handleDelete(scope.$index, scope.row, proxy)">删除</el-button>
 			</template>
-			<!-- <template #default="scope">
-				<el-button size="mini" @click="handlePurchase(scope.$index, scope.row, proxy)">进货</el-button>
-				<el-button size="mini" @click="handleEdit(scope.$index, scope.row, proxy)">编辑</el-button>
-				<el-button size="mini" type="danger" @click="handleDelete(scope.$index, scope.row, proxy)">删除</el-button>
-			</template> -->
 		</el-table-column>
 	</el-table>
 	<el-dialog title="编辑用户信息" v-model="dialogTableVisible" center width="27%">
@@ -209,7 +196,7 @@
 					if (valid) {
 						console.log('验证通过');
 						console.log('id'+proxy.userInfo.user_id)
-						if(proxy.user_id!=''||proxy.user_id!=null){
+						if(proxy.user_id!='' || proxy.user_id!=null){
 							proxy.userInfo.user_id = Number(proxy.user_id)
 						}else{
 							proxy.userInfo.user_id = 4;

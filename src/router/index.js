@@ -4,6 +4,7 @@ import Login from '../views/Login.vue'
 import Register from '../views/Register.vue'
 import Mainpage from '../views/Mainpage.vue'
 import Adminpage from '../views/Adminpage.vue'
+import BookDetail from '../views/BookDetail.vue'
 
 const routes = [
   {
@@ -30,6 +31,11 @@ const routes = [
   	path: '/adminpage',
   	name: 'Adminpage',
   	component: Adminpage
+  },
+  {
+  	path: '/bookdetail',
+  	name: 'Bookdetail',
+  	component: BookDetail
   },
   {
     path: '/about',
