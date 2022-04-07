@@ -53,6 +53,8 @@
 						console.log(titleList);
 						console.log(rateList);
 						var option = {
+							tooltip: {},
+							legend: {},
 							xAxis: {
 							    name: '图书标题',
 								type: 'category',
@@ -63,8 +65,12 @@
 								type: 'value',
 							},
 							series: [{
+								name: '评分排名统计',
 								data: rateList,
-								type: 'bar'
+								type: 'bar',
+								label: {
+								      show: true
+								    },
 							}]
 						};
 						let myChart = proxy.$echarts.init(document.getElementById('myChart'));

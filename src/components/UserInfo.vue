@@ -1,26 +1,5 @@
 <template>
 	<div id="UserInfo">
-		<!-- <el-table :data="users" style="width: 100%;">
-			<el-table-column prop="user_id" label="用户编号" width="160"></el-table-column>
-			<el-table-column prop="username" label="用户名" width="150"></el-table-column>
-			<el-table-column prop="user_pwd" label="用户密码" width="130"></el-table-column>
-			<el-table-column prop="is_admin" label="是否为管理员" width="130">
-				<template #default="scope">
-					<template v-if="scope.row.is_admin == 1">
-						<el-tag class="mx-1" size="large">是</el-tag>
-					</template>
-					<template v-else>
-						<el-tag class="mx-1" size="large">否</el-tag>
-					</template>
-				</template>
-			</el-table-column>
-			<el-table-column label="操作">
-				<template #default="scope">
-					<el-button size="small" type="primary" @click="handleEdit(scope.$index, scope.row, proxy)">编辑</el-button>
-					<el-button size="small" type="danger" @click="handleDelete(scope.$index, scope.row, proxy)">删除</el-button>
-				</template>
-			</el-table-column>
-		</el-table> -->
 		<el-descriptions title="用户信息"  
 			v-for="user in users" 
 			style="margin-top: 15%;width: 60%;margin-left: 20%"

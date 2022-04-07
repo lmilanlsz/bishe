@@ -12,8 +12,8 @@
 		<el-table-column prop="book_id" label="图书编号" width="160"></el-table-column>
 		<el-table-column prop="book_img" label="图书图片" width="160">
 			<template class="demo-image" #default="scope">
-			    <div :key="fill" class="block">
-			      <el-image style="width: 100px; height: 100px" :src="require('@/assets/img/' + scope.row.book_img)" :fit="fill" />
+			    <div :key="'fill'" class="block">
+			      <el-image style="width: 100px; height: 100px" :src="require('@/assets/img/' + scope.row.book_img)" :fit="'fill'" />
 			    </div>
 			</template>
 		</el-table-column>

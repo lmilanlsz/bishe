@@ -1,7 +1,6 @@
 <template>
 	<div id="UserBookList">
 		<el-table
-		
 			:data="filterData(book.slice((currentPage - 1) * pagesize, currentPage * pagesize), search)" 
 			style="width: 100%;"  
 			:default-sort = "{prop: 'book_id', order: 'aescending'}"
@@ -10,14 +9,15 @@
 			<el-table-column prop="book_id" label="图书编号" width="160"></el-table-column>
 			<el-table-column prop="book_img" label="图书图片" width="160">
 				<template class="demo-image" #default="scope">
-				    <div :key="fill" class="block">
-				      <el-image  @click="handleDetail(scope.$index, scope.row, proxy)" style="width: 100px; height: 100px" :src="require('@/assets/img/' + scope.row.book_img)" :fit="fill" />
+				    <div :key="'fill'" class="block">
+				      <el-image  @click="handleDetail(scope.$index, scope.row, proxy)" style="width: 100px; height: 100px" :src="require('@/assets/img/' + scope.row.book_img)" :fit="'fill'" />
 				    </div>
 				</template>
 			</el-table-column>
 			<el-table-column prop="book_title" label="图书标题" width="160"></el-table-column>
 			<el-table-column prop="book_author" label="图书作者" width="160"></el-table-column>
 			<el-table-column prop="book_category" label="图书类别" width="160"></el-table-column>
+			<el-table-column prop="book_is_liked" label="被推荐数" width="160"></el-table-column>
 			<el-table-column prop="book_rate" label="图书评分" width="160">
 				<template #default="scope">
 				  <el-rate
@@ -40,7 +40,7 @@
 		    layout="prev, pager, next"
 		    @current-change="current_change"
 		    :total=100
-		    background=true
+		    background
 			hide-on-single-page
 		    >
 		</el-pagination>
