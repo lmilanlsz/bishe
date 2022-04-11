@@ -33,20 +33,47 @@
 				        <el-input v-model="search" size="small" placeholder="Type to search" />
 				</template>
 				<template #default="scope">
-						<!-- <el-button size="small" type="primary" @click="handleEdit(scope.$index, scope.row, proxy)">已读</el-button> -->
-						  <el-popconfirm
-						    confirm-button-text="确定"
-						    cancel-button-text="取消"
-						    title="确定要移出愿望单吗?"
-							@confirm="handleDelete(scope.$index, scope.row, proxy)"
-						  >
-						    <template #reference>
-						      <el-button size="small" type="danger">移出愿望单</el-button>
-						    </template>
-						  </el-popconfirm>	
+					<!-- <el-button size="small" type="primary" @click="handleEdit(scope.$index, scope.row, proxy)">已读</el-button> -->
+					<el-popconfirm
+						confirm-button-text="确定"
+						cancel-button-text="取消"
+						title="确定要移出愿望单吗?"
+						@confirm="handleDelete(scope.$index, scope.row, proxy)"
+					>
+						<template #reference>
+							<el-button size="small" type="danger" style="margin-right: 35%;">移出愿望单</el-button>
+						</template>
+					</el-popconfirm>	
 				</template>
 			</el-table-column>
 		</el-table>
+		<div class="btn" style="margin-top: 5%;">
+			<el-affix position="bottom">
+				<el-button type="primary" @click="handleRecommend(proxy)">猜你喜欢</el-button>
+			</el-affix>
+		</div>
+		<div class="bookList" v-if="getData" v-for="book in books">
+			<el-card :body-style="{ padding: '0px' }" class="card" @click="handleDetail(book)">
+				<div class="img">
+					<img
+						:src="require('@/assets/img/' + book.book_img)"
+						class="image"
+						:fit="'cover'"
+					/>
+				</div>
+			    <div style="padding: 14px">
+					<span>{{book.book_title}}</span>
+					<div class="bottom">
+						<el-rate
+							v-model="book.book_rate"
+							disabled
+							show-score
+							text-color="#ff9900"
+						/>
+			        </div>
+			    </div>
+			</el-card>
+		</div>
 	</div>
 </template>
 
@@ -58,8 +85,21 @@
 		name: "WishList",
 		data() {
 			return {
-				wishlist:[],
+				getData: false,
+				wishlist: [],
 				search: '',
+				books: {
+					book_id: '',
+					book_title: '',
+					book_img: '',
+					book_rate: '',
+				},
+				book: {
+					book_id: '',
+					book_title: '',
+					book_img: '',
+					book_rate: '',
+				},
 			}
 		},
 		setup() {
@@ -96,16 +136,12 @@
 			      }
 			      return items1;
 			    },
-			dateFormat:function(row,column){
+			dateFormat:function(row,column) {
 			        var date = row[column.property];
 			        if(date == undefined){return ''};
 			        return moment(date).format("YYYY-MM-DD");
 			},
 			handleRead(index, row, proxy) {
-				// proxy.wishlist_id = row.wishlist_id;
-				// proxy.wishlistInfo = JSON.parse(JSON.stringify(row));
-				// console.log(proxy.wishlistInfo)
-				// proxy.dialogTableVisible = true;
 				var wishlist_id = Qs.stringify({"wishlist_id": row.wishlist_id});
 				proxy.$axios.post('api/wishlist/read', wishlist_id).then(res => {
 					if(res.data.code==200){
@@ -127,7 +163,7 @@
 					}
 				});
 			},
-			getWishlist(proxy){
+			getWishlist(proxy) {
 				var user_id = Qs.stringify({"user_id": proxy.$store.state.user_id});
 				proxy.$axios.post('api/user/wishlist', user_id).then(res => {
 					proxy.wishlist = res.data.data;
@@ -135,16 +171,58 @@
 					console.log(res.data);
 				});
 			},
+			handleRecommend(proxy) {
+				var user_id = Qs.stringify({"user_id": proxy.$store.state.user_id});
+				proxy.$axios.post('api/recommend/res', user_id).then(res => {
+					proxy.books = res.data;
+					console.log(res.data)
+					console.log(proxy.books);
+					proxy.getData = true;
+				});
+			}
 		}
 	}
 </script>
 
 <style scoped>
 .el-alert {
-  margin: 20px 0 0;
+	margin: 20px 0 0;
 }
 .el-alert:first-child {
-  margin: 0;
+	margin: 0;
+}
+
+.bookList {
+	margin-left: 10%;
+}
+	
+.card {
+	height: 10%;
+	width: 20%;
+	float: left;
+	display: flex;
+	margin-left: 7%;
+	margin-top: 3%;
+}
+	
+.bottom {
+	margin-top: 13px;
+	line-height: 12px;
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	margin-left: 25%;
+}
+	
+.button {
+	padding: 0;
+	min-height: auto;
+}
+	
+.image {
+	width: 350px;
+	height: 450px;
+	display: block;
 }
 </style>
 

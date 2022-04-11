@@ -1,5 +1,8 @@
 <template>
 	<div id="UserMain" v-if="getData">
+		<div class="hotTitle">
+			大家都爱看
+		</div>
 		<div class="bookList" v-for="book in books">
 			<el-card :body-style="{ padding: '0px' }" class="card" @click="handleDetail(book)">
 				<div class="img">
@@ -111,8 +114,15 @@
 	}
 	
 	.image {
-	  width: 300px;
-	  height: 400px;
+	  width: 350px;
+	  height: 450px;
 	  display: block;
+	}
+	
+	.hotTitle {
+		font-weight: bold;
+		font-size: xx-large;
+		color: #F23C3C;
+		margin-top: 3%;
 	}
 </style>

@@ -2,9 +2,10 @@
 	<div id="UserBookList">
 		<el-table
 			:data="filterData(book.slice((currentPage - 1) * pagesize, currentPage * pagesize), search)" 
-			style="width: 100%;"  
+			style="width: 80%;margin-left: 10%;margin-top: 3%;"  
 			:default-sort = "{prop: 'book_id', order: 'aescending'}"
 			stripe
+			border
 			>
 			<el-table-column prop="book_id" label="图书编号" width="160"></el-table-column>
 			<el-table-column prop="book_img" label="图书图片" width="160">

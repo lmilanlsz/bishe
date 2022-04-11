@@ -288,7 +288,7 @@
 	
 	.box-card {
 		width: 480px;
-		margin-left: 32%;
+		margin-left: 33.5%;
 		margin-bottom: 7%;
 	}
 </style>
