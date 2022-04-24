@@ -31,4 +31,6 @@ html, body
 		-moz-osx-font-smoothing grayscale
 		text-align center
 		color #2c3e50
+	.el-tooltip__popper
+		background: rgba(255, 255, 255, 0.6)
 </style>

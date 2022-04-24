@@ -78,7 +78,7 @@
 	  	var validatePass = (rule, value, callback) => {
 	  		if (value === '') {
 	  			callback(new Error('确认密码不能为空'));
-	  		} else if (value !== this.registerForm.pass) {
+	  		} else if (value !== this.registerForm.password) {
 	  			callback(new Error('两次输入密码不一致!'));
 	  		} else {
 	  			callback();
@@ -158,7 +158,7 @@
 					if (res.data.code == 404 && res.data.msg != null) {
 						alert("用户已存在")
 					} else {
-						proxy.$router.push('/mainpage')
+						proxy.$router.push('/login')
 					}
 				})
 			})

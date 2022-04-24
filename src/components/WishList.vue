@@ -1,13 +1,13 @@
 <template>
 	<div id="WishList">
 		<el-table :data="filterData(wishlist, search)"
-			style="width: 75%;margin-left: 10%;margin-top: 5%;" 
+			style="width: 65%;margin-left: 17.5%;margin-top: 5%;" 
 			border
 			:default-sort="{ prop: 'wish_date', order: 'ascending' }"
 			stripe>
-			<el-table-column prop="book_id" label="图书编号" width="160px"></el-table-column>
+			<!-- <el-table-column prop="book_id" label="图书编号" width="160px"></el-table-column> -->
 			<el-table-column prop="book_title" label="图书标题" width="250px"></el-table-column>
-			<el-table-column prop="username" label="用户名" width="200px"></el-table-column>
+			<el-table-column prop="book_author" label="图书作者" width="200px"></el-table-column>
 			<el-table-column prop="wish_date" label="添加时间" width="250px" :formatter="dateFormat" sortable></el-table-column>
 			<el-table-column prop="wish_status" label="图书状态" width="160px">
 				<template #default="scope">
@@ -33,7 +33,6 @@
 				        <el-input v-model="search" size="small" placeholder="Type to search" />
 				</template>
 				<template #default="scope">
-					<!-- <el-button size="small" type="primary" @click="handleEdit(scope.$index, scope.row, proxy)">已读</el-button> -->
 					<el-popconfirm
 						confirm-button-text="确定"
 						cancel-button-text="取消"

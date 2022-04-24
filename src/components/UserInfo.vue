@@ -1,5 +1,5 @@
 <template>
-	<div id="UserInfo">
+	<div id="UserInfo1">
 		<el-descriptions title="用户信息"  
 			v-for="user in users" 
 			style="margin-top: 15%;width: 60%;margin-left: 20%"
@@ -24,48 +24,48 @@
 		  </el-descriptions-item>
 		</el-descriptions>
 		<el-dialog title="编辑信息" v-model="dialogTableVisible" center width="27%">
-			<el-form ref="userInfo" :model="userInfo" :rules="rules" :label-position="right" label-width="80px">
+			<el-form ref="userInfo1" :model="userInfo1" :rules="rules" :label-position="right" label-width="80px">
 				<!-- <el-form-item label="用户编号" prop="user_id">
-					<el-input v-model="userInfo.user_id"></el-input>
+					<el-input v-model="userInfo1.user_id"></el-input>
 				</el-form-item> -->
 				<el-form-item label="用户名" prop="username">
-				<el-input
-				      name="username"
-				      type="text"
-					  @keyup.enter.native="onSubmit"
-				      v-model="userInfo.username"
-				      autocomplete="on"
-				  >
-				  </el-input>
+					<el-input
+						name="username"
+						type="text"
+						@keyup.enter.native="onSubmit"
+						v-model="userInfo1.username"
+						autocomplete="on"
+					>
+				</el-input>
 				</el-form-item>
 				<el-form-item label="修改密码" prop="user_pwd">
-				  <el-input
-				      name="user_pwd"
-				      :type="pwdType"
-				      @keyup.enter.native="onSubmit"
-				      v-model="userInfo.user_pwd"
-				      autocomplete="on"
-				  >
+					<el-input
+						name="user_pwd"
+						:type="pwdType"
+						@keyup.enter.native="onSubmit"
+						v-model="userInfo1.user_pwd"
+						autocomplete="on"
+					>
 				    <template #suffix>
 				       <el-icon class="el-input__icon" @click="showPwd()"><user /></el-icon>
 				    </template>
 				  </el-input>
 				</el-form-item>
 				<el-form-item label="确认密码" prop="checkPwd">
-				  <el-input
-				      name="checkPwd"
-				      :type="pwdType"
-				      @keyup.enter.native="onSubmit"
-				      v-model="userInfo.checkPwd"
-				      autocomplete="on"
-				  >
+					<el-input
+						name="checkPwd"
+						:type="pwdType"
+						@keyup.enter.native="onSubmit"
+						v-model="userInfo1.checkPwd"
+						autocomplete="on"
+					>
 				    <template #suffix>
 				       <el-icon class="el-input__icon" @click="showPwd()"><user /></el-icon>
 				    </template>
 				  </el-input>
 				</el-form-item>
 				<el-form-item size="large">
-					<el-button type="primary" @click="onSubmit('userInfo', proxy)" style="margin-right: 10%;">确定</el-button>
+					<el-button type="primary" @click="onSubmit('userInfo1', proxy)" style="margin-right: 10%;">确定</el-button>
 					<el-button @click="handleCancel(proxy)" style="margin-right: 20%;">取消</el-button>
 				</el-form-item>
 			</el-form>
@@ -89,14 +89,14 @@ export default {
 		var validatePass = (rule, value, callback) => {
 			if (value === '') {
 				callback(new Error('确认密码不能为空'));
-			} else if (value !== this.userInfo.user_pwd) {
+			} else if (value !== this.userInfo1.user_pwd) {
 				callback(new Error('两次输入密码不一致!'));
 			} else {
 				callback();
 			}
 		};
 		return {
-			userInfo: {
+			userInfo1: {
 				user_id: '',
 				username: '',
 				user_pwd:'',
@@ -188,7 +188,7 @@ export default {
 		},
 		handleEdit(index, row, proxy) {
 			proxy.user_id = row.user_id;
-			proxy.userInfo = JSON.parse(JSON.stringify(row));
+			proxy.userInfo1 = JSON.parse(JSON.stringify(row));
 			this.dialogTableVisible = true;
 			console.log("弹窗呢")
 		},
@@ -198,13 +198,9 @@ export default {
 				console.log("进行表单验证")
 				if (valid) {
 					console.log('验证通过');
-					console.log('id'+proxy.userInfo.user_id)
-					if(proxy.user_id!=''||proxy.user_id!=null){
-						proxy.userInfo.user_id = Number(proxy.user_id)
-					}else{
-						proxy.userInfo.user_id = 4;
-					}
-					var userData = Qs.stringify(proxy.userInfo);
+					console.log('id'+proxy.userInfo1.user_id)
+					console.log('username'+proxy.userInfo1.username)
+					var userData = Qs.stringify(proxy.userInfo1);
 					var query=this.$route.query;
 					console.log("no"+userData)
 					this.$axios.post('api/admin/upload', userData).then(res => {
@@ -217,7 +213,7 @@ export default {
 								} else {
 									console.log('修改商品信息');
 								}
-								this.resetUserInfo(proxy)
+								this.resetUserInfo1(proxy)
 							} else {
 								alert(res.data.msg);
 							}
@@ -232,10 +228,10 @@ export default {
 		},
 		handleCancel(proxy) {
 			this.dialogTableVisible = false;
-			proxy.resetUserInfo(proxy)
+			proxy.resetUserInfo1(proxy)
 		},
-		resetUserInfo(proxy){
-			proxy.userInfo ={
+		resetUserInfo1(proxy){
+			proxy.userInfo1 ={
 				user_id: '',
 				username: '',
 				user_pwd:'',

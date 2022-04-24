@@ -5,8 +5,8 @@
 			border
 			:default-sort="{ prop: 'review_date', order: 'ascending' }"
 			stripe>
-			<el-table-column prop="review_id" label="评价编号" width="160px"></el-table-column>
-			<el-table-column prop="book_id" label="图书编号" width="160px"></el-table-column>
+			<!-- <el-table-column prop="review_id" label="评价编号" width="160px"></el-table-column>
+			<el-table-column prop="book_id" label="图书编号" width="160px"></el-table-column> -->
 			<el-table-column prop="book_title" label="图书标题" width="250px"></el-table-column>
 			<el-table-column prop="review_rate" label="评价分数" width="250px">
 				<template #default="scope">
@@ -45,7 +45,7 @@
 				  >
 				  </el-input>
 				</el-form-item>
-				<el-form-item label="图书编号" prop="book_id">
+				<el-form-item label="图书标题" prop="book_id">
 				  <el-input
 				      name="book_id"
 				      type="text"

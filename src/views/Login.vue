@@ -83,7 +83,7 @@ export default {
 	  };
     return {
       loginForm: {
-        username: "hkc",
+        username: "admin",
         password: "12345"
       },
       loading: false,

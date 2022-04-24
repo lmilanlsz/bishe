@@ -1,5 +1,39 @@
 <template>
 	<div id="UserBookList">
+		<div class="select" style="margin-top: 2%;margin-bottom: 2%;">
+			<!-- <template slot-scope="scope"> -->
+				<el-dropdown style="margin-right: 5%;" @command="(command)=>{handleCategoryCommand(command, proxy)}">
+				    <el-button type="primary">
+				        按分类查看
+						<el-icon class="el-icon--right"><arrow-down /></el-icon>
+				    </el-button>
+				    <template #dropdown>
+						<el-dropdown-menu>
+							<el-dropdown-item command="all">全部</el-dropdown-item>
+							<div  v-for="category in u_categories">
+								<el-dropdown-item :command="category.category_name">{{category.category_name}}</el-dropdown-item>
+							</div>
+				        </el-dropdown-menu>
+				    </template>
+				</el-dropdown>
+			<!-- </template> -->
+			<el-dropdown @command="(command)=>{handleCommand(command, proxy)}">
+			    <el-button type="primary" >
+			        按评价查看
+					<el-icon class="el-icon--right"><arrow-down /></el-icon>
+			    </el-button>
+			    <template #dropdown>
+					<el-dropdown-menu>
+						<div>
+							<el-dropdown-item command="0">全部</el-dropdown-item>
+							<el-dropdown-item command="1">好评</el-dropdown-item>
+							<el-dropdown-item command="2">中评</el-dropdown-item>
+							<el-dropdown-item command="3">差评</el-dropdown-item>
+						</div>
+			        </el-dropdown-menu>
+			    </template>
+			</el-dropdown>
+		</div>
 		<el-table
 			:data="filterData(book.slice((currentPage - 1) * pagesize, currentPage * pagesize), search)" 
 			style="width: 80%;margin-left: 10%;margin-top: 3%;"  
@@ -7,7 +41,7 @@
 			stripe
 			border
 			>
-			<el-table-column prop="book_id" label="图书编号" width="160"></el-table-column>
+			<!-- <el-table-column prop="book_id" label="图书编号" width="60"></el-table-column> -->
 			<el-table-column prop="book_img" label="图书图片" width="160">
 				<template class="demo-image" #default="scope">
 				    <div :key="'fill'" class="block">
@@ -17,9 +51,11 @@
 			</el-table-column>
 			<el-table-column prop="book_title" label="图书标题" width="160"></el-table-column>
 			<el-table-column prop="book_author" label="图书作者" width="160"></el-table-column>
-			<el-table-column prop="book_category" label="图书类别" width="160"></el-table-column>
-			<el-table-column prop="book_is_liked" label="被推荐数" width="160"></el-table-column>
-			<el-table-column prop="book_rate" label="图书评分" width="160">
+			<el-table-column prop="category_name" label="图书类别" width="100"></el-table-column>
+			<el-table-column prop="book_press" label="图书出版社" width="120"></el-table-column>
+			<!-- <el-table-column prop="book_page" label="图书页数" width="80" sortable></el-table-column> -->
+			<el-table-column prop="book_is_liked" label="被推荐数" width="80" sortable></el-table-column>
+			<el-table-column prop="book_rate" label="图书评分" width="160" sortable>
 				<template #default="scope">
 				  <el-rate
 				    v-model="scope.row.book_rate"
@@ -29,7 +65,11 @@
 				  />
 				</template>
 			</el-table-column>
-			
+			<el-table-column prop="book_desc" label="图书简介" width="200" :show-overflow-tooltip="true">
+				<template #default="scope">
+					<span>{{scope.row.book_desc}}</span>
+				</template>
+			</el-table-column>
 			<el-table-column align="right">
 				<template #header>
 				        <el-input v-model="search" size="small" placeholder="Type to search" />
@@ -106,10 +146,10 @@
 <script>
 	import { getCurrentInstance } from 'vue';
 	import Qs from 'qs';
-	import { User, Plus } from '@element-plus/icons';
+	import { User, Plus, ArrowDown, CirclePlus} from '@element-plus/icons';
 	export default {
 		name: 'BookList',
-		components: { User, Plus },
+		components: { User, Plus, ArrowDown, CirclePlus },
 		data(){
 			return{
 				total: 1000,//默认数据总数
@@ -156,11 +196,58 @@
 				console.log('book' + proxy.$store.state.token);
 				console.log(res.data);
 			});
+			proxy.$axios.get('api/category/list').then(res => {
+				proxy.categories = res.data.data;
+				console.log('categories' + proxy.$store.state.token);
+				console.log(res.data);
+			});
+			proxy.$axios.get('api/category/usedList').then(res => {
+				proxy.u_categories = res.data.data;
+				console.log('u_categories' + proxy.$store.state.token);
+				console.log(res.data);
+			});
 		},
 		created: function(){
 		         this.total=this.book.length;
 		},
 		methods:{
+			handleCommand(command, proxy) {
+				if (command == "0") {
+					proxy.$axios.get('api/book/list').then(res => {
+						proxy.book = res.data.data;
+						console.log('book' + proxy.$store.state.token);
+						console.log(res.data);
+					});
+				} else {
+					var rateData = Qs.stringify({"book_rate": command});
+					proxy.$axios.post('api/book/byRate', rateData).then(res => {
+						setTimeout(() => {
+							proxy.book = res.data.data;
+							console.log('book' + proxy.$store.state.token);
+							console.log(res.data.data);
+						}, 100);
+					});
+				}
+			},
+			handleCategoryCommand(command, proxy) {
+					console.log(command)
+					if (command == "all") {
+						proxy.$axios.get('api/book/list').then(res => {
+							proxy.book = res.data.data;
+							console.log('book' + proxy.$store.state.token);
+							console.log(res.data);
+						});
+					} else {
+						var cateData = Qs.stringify({"category_name": command});
+						proxy.$axios.post('api/book/byCate', cateData).then(res => {
+							setTimeout(() => {
+								proxy.book = res.data.data;
+								console.log('book' + proxy.$store.state.token);
+								console.log(res.data.data);
+							}, 100);
+						});
+					}
+			},
 			filterData(data,searchContent) {
 			      //var input = this.searchContent && this.searchContent.toLowerCase();
 			      var input = searchContent.toLowerCase()

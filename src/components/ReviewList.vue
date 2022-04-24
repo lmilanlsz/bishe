@@ -1,12 +1,72 @@
 <template>
 	<div class="ReviewList">
-	<el-table :data="review" style="width: 100%;">
-		<el-table-column prop="review_id" label="评价编号" width="160"></el-table-column>
-		<el-table-column prop="user_id" label="用户编号" width="160"></el-table-column>
-		<el-table-column prop="username" label="用户名称" width="160"></el-table-column>
-		<el-table-column prop="book_id" label="图书编号" width="160"></el-table-column>
-		<el-table-column prop="book_title" label="图书标题" width="160"></el-table-column>
-		<el-table-column prop="review_rate" label="评价评分" width="160">
+	<div class="select" style="margin-top: 2%;margin-bottom: 2%;">
+		<!-- <template slot-scope="scope"> -->
+			<el-dropdown style="margin-right: 5%;">
+			    <el-button type="primary">
+			        按书名查看
+					<el-icon class="el-icon--right"><arrow-down /></el-icon>
+			    </el-button>
+			    <template #dropdown>
+					<el-dropdown-menu>
+						<div>
+							<el-dropdown-item @click="handleAll(proxy)">
+								全部
+							</el-dropdown-item>
+						</div>
+						<div @click="handleTitle(title, proxy)" v-for="title in titles">
+							<el-dropdown-item>{{title}}</el-dropdown-item>
+						</div>
+			        </el-dropdown-menu>
+			    </template>
+			</el-dropdown>
+		<!-- </template> -->
+		<!-- <el-dropdown style="margin-right: 5%;">
+		    <el-button type="primary">
+		        按用户查看
+				<el-icon class="el-icon--right"><arrow-down /></el-icon>
+		    </el-button>
+		    <template #dropdown>
+				<el-dropdown-menu>
+					<div>
+						<el-dropdown-item @click="handleAll(proxy)">
+							全部
+						</el-dropdown-item>
+					</div>
+					<div @click="handleUser(user, proxy)"  v-for="user in users">
+						<el-dropdown-item>{{user}}</el-dropdown-item>
+					</div>
+		        </el-dropdown-menu>
+		    </template>
+		</el-dropdown> -->
+		<el-dropdown @command="(command)=>{handleCommand(command, proxy)}">
+		    <el-button type="primary" >
+		        按评价查看
+				<el-icon class="el-icon--right"><arrow-down /></el-icon>
+		    </el-button>
+		    <template #dropdown>
+				<el-dropdown-menu>
+					<div>
+						<el-dropdown-item command="0">全部</el-dropdown-item>
+						<el-dropdown-item command="4">大于4分</el-dropdown-item>
+						<el-dropdown-item command="3">大于3分</el-dropdown-item>
+						<el-dropdown-item command="2">大于2分</el-dropdown-item>
+					</div>
+		        </el-dropdown-menu>
+		    </template>
+		</el-dropdown>
+	</div>
+	<el-table :data="filterData(review.slice((currentPage - 1) * pagesize, currentPage * pagesize), search)" 
+			style="width: 100%;" 
+			:default-sort = "{prop: 'review_id', order: 'aescending'}"
+			stripe>
+		<el-table-column prop="review_id" label="评价编号" width="100px"></el-table-column>
+		<!-- <el-table-column prop="user_id" label="用户编号" width="100px" sortable></el-table-column> -->
+		<el-table-column prop="username" label="用户名称" width="160px"></el-table-column>
+		<!-- <el-table-column prop="book_id" label="图书编号" width="100px" sortable></el-table-column> -->
+		<el-table-column prop="book_title" label="图书标题" width="200px"></el-table-column>
+		<el-table-column prop="category_name" label="图书类别" width="100px" sortable></el-table-column>
+		<el-table-column prop="review_rate" label="评价评分" width="180px" sortable>
 			<template #default="scope">
 			  <el-rate
 			    v-model="scope.row.review_rate"
@@ -16,75 +76,44 @@
 			  />
 			</template>
 		</el-table-column>
-		<el-table-column prop="review_content" label="评价内容" width="160"></el-table-column>
+		<el-table-column prop="review_content" label="评价内容" width="220px"></el-table-column>
+		<el-table-column prop="review_date" label="评价时间" width="250px" :formatter="dateFormat" sortable></el-table-column>
 		<el-table-column label="操作">
 			<template #default="scope">
-					<el-button size="small" type="primary" @click="handleEdit(scope.$index, scope.row, proxy)">编辑</el-button>
-					<el-button size="small" type="danger" @click="handleDelete(scope.$index, scope.row, proxy)">删除</el-button>
+				<!-- <el-button size="small" type="primary" @click="handleEdit(scope.$index, scope.row, proxy)">编辑</el-button> -->
+				<div v-if="scope.row.review_status == 0">
+					<el-button size="small" type="danger" @click="handleDelete(scope.$index, scope.row, proxy)">屏蔽</el-button>
+				</div>
+				<div v-else>
+					<el-button size="small" type="danger" @click="handleDelete(scope.$index, scope.row, proxy)" disabled>屏蔽</el-button>
+				</div>
+			</template>
+		</el-table-column>
+		<el-table-column align="right">
+			<template #header>
+			    <el-input v-model="search" size="small" placeholder="Type to search" />
 			</template>
 		</el-table-column>
 	</el-table>
-	<el-dialog title="编辑评价信息" v-model="dialogTableVisible" center width="27%">
-		<el-form ref="reviewInfo" :model="reviewInfo" :rules="rules" :label-position="right" label-width="80px">
-			<el-form-item label="评价编号" prop="review_id">
-				<el-input v-model="reviewInfo.review_id"></el-input>
-			</el-form-item>
-			<el-form-item label="用户编号" prop="user_id">
-			<el-input
-			      name="user_id"
-			      type="text"
-				  @keyup.enter.native="onSubmit"
-			      v-model="reviewInfo.user_id"
-			      autocomplete="on"
-			  >
-			  </el-input>
-			</el-form-item>
-			<el-form-item label="图书编号" prop="book_id">
-			  <el-input
-			      name="book_id"
-			      type="text"
-			      @keyup.enter.native="onSubmit"
-			      v-model="reviewInfo.book_id"
-			      autocomplete="on"
-			  >
-			  </el-input>
-			</el-form-item>
-			<el-form-item label="评价分数" prop="review_rate">
-			  <el-input
-			      name="review_rate"
-			      type="text"
-			      @keyup.enter.native="onSubmit"
-			      v-model="reviewInfo.review_rate"
-			      autocomplete="on"
-			  >
-			  </el-input>
-			</el-form-item>
-			<el-form-item label="评价内容" prop="review_content">
-				<el-input
-				    name="review_content"
-				    type="text"
-				    @keyup.enter.native="onSubmit"
-				    v-model="reviewInfo.review_content"
-				    autocomplete="on"
-				>
-				</el-input>
-			</el-form-item>
-			<el-form-item size="large">
-				<el-button type="primary" @click="onSubmit('reviewInfo', proxy)" style="margin-right: 10%;">确定</el-button>
-				<el-button @click="handleCancel(proxy)" style="margin-right: 20%;">取消</el-button>
-			</el-form-item>
-		</el-form>
-	</el-dialog>
+	<el-pagination
+		class="pagination"
+	    layout="prev, pager, next"
+	    @current-change="current_change"
+	    :total=100
+	    background="true"
+	    >
+	</el-pagination>
 	</div>
 </template>
 
 <script>
 	import { getCurrentInstance } from 'vue';
 	import Qs from 'qs';
-	import { User, Plus } from '@element-plus/icons';
+	import { User, Plus, ArrowDown } from '@element-plus/icons';
+	import moment from 'moment';
 	export default {
 		name: 'ReviewList',
-		components: { User, Plus },
+		components: { User, Plus, ArrowDown },
 		data(){
 			var validatePass = (rule, value, callback) => {
 				if (value === '') {
@@ -96,8 +125,15 @@
 				}
 			};
 			return {
+				total: 1000,//默认数据总数
+				pagesize: 10,//每页的数据条数
+				currentPage: 1,//默认开始页面
 				dialogTableVisible: false,
+				btnDisable: true,
 				review:[],
+				title:{
+					
+				},
 				imageUrl:'',
 				reviewInfo: {
 					user_id: '',
@@ -106,6 +142,11 @@
 					review_content:'',
 					book_id: '',
 				},
+				selectForm: {
+					book_title: '',
+					review_rate: '',
+				},
+				search: '',
 				rules: {
 					user_id: [
 						{ required:true, message: '用户编号不能为空', trigger: 'blur' },
@@ -133,10 +174,95 @@
 			proxy.$axios.get('api/review/list').then(res => {
 				proxy.review = res.data.data;
 				console.log('review' + proxy.$store.state.token);
-				console.log(res.data);
+				console.log(res.data.data);
+				
+			});
+			proxy.$axios.get('api/review/title').then(res => {
+				proxy.titles = res.data.data;
+				console.log('title' + proxy.$store.state.token);
+				console.log(res.data.data);
+			});
+			proxy.$axios.get('api/review/user').then(res => {
+				proxy.users = res.data.data;
+				console.log('user' + proxy.$store.state.token);
+				console.log(res.data.data);
 			});
 		},
 		methods:{
+			handleAll(proxy) {
+				proxy.$axios.get('api/review/list').then(res => {
+					proxy.review = res.data.data;
+					console.log('review' + proxy.$store.state.token);
+					console.log(res.data.data);
+				});
+			},
+			handleCommand(command, proxy) {
+				console.log(command)
+				if (command == "0") {
+					proxy.$axios.get('api/review/list').then(res => {
+						proxy.review = res.data.data;
+						console.log('review' + proxy.$store.state.token);
+						console.log(res.data.data);
+					});
+				} else {
+					var rateData = Qs.stringify({"review_rate": command});
+						proxy.$axios.post('api/review/byRate', rateData).then(res => {
+						setTimeout(() => {
+							proxy.review = res.data.data;
+							console.log('rate' + proxy.$store.state.token);
+							console.log(res.data.data);
+						}, 1000);
+					});
+				}
+			},
+			handleTitle(title, proxy) {
+					console.log(title)
+					var titleData = Qs.stringify({"book_title": title});
+					proxy.$axios.post('api/review/byTitle', titleData).then(res => {
+						setTimeout(() => {
+							proxy.review = res.data.data;
+							console.log('title' + proxy.$store.state.token);
+							console.log(res.data.data);
+						}, 1000);
+					});
+			},
+			handleUser(user, proxy) {
+					console.log(user)
+					var userData = Qs.stringify({"username": user});
+					proxy.$axios.post('api/review/byUser', userData).then(res => {
+						setTimeout(() => {
+							proxy.review = res.data.data;
+							console.log('user' + proxy.$store.state.token);
+							console.log(res.data.data);
+						}, 1000);
+					});
+			},
+			dateFormat:function(row,column) {
+			        var date = row[column.property];
+			        if(date == undefined){return ''};
+			        return moment(date).format("YYYY-MM-DD HH:mm:ss");
+			},
+			filterData(data,searchContent) {
+			      //var input = this.searchContent && this.searchContent.toLowerCase();
+			      var input = searchContent.toLowerCase()
+			      var items = data;
+			      var items1;
+			      if (input) {
+			        items1 = items.filter(function(item) {
+			          return Object.keys(item).some(function(key1) {
+			            return String(item[key1])
+			              .toLowerCase()
+			              .match(input);
+			          });
+			        });
+			      } else {
+			        items1 = items;
+			      }
+			      return items1;
+			    },
+			current_change: function(currentPage){
+			    this.currentPage = currentPage;
+			},
 			handleAvatarSuccess(res, file) {
 			    this.imageUrl = URL.createObjectURL(file.raw);
 				console.log(this.imageUrl);
@@ -163,8 +289,7 @@
 				proxy.dialogTableVisible = true;
 			},
 			handleDelete(index, row, proxy) {
-				console.log(index, row);
-				console.log(proxy);
+				console.log(scope.row.review.status);
 				proxy.$axios.get('api/review/delete',
 				{params:{
 					no:row.review_id
@@ -176,6 +301,12 @@
 						}
 					},1000)
 				})
+				proxy.btnDisable = false
+				proxy.$axios.get('api/review/list').then(res => {
+					proxy.review = res.data.data;
+					console.log('review' + proxy.$store.state.token);
+					console.log(res.data.data);
+				});
 			},
 			getReviewList(proxy){
 				proxy.$axios.get('api/review/list').then(res => {
@@ -266,5 +397,17 @@
 	  width: 178px;
 	  height: 178px;
 	  text-align: center;
+	}
+	
+	.el-dropdown {
+		vertical-align: top;
+	}
+	
+	.el-dropdown + .el-dropdown {
+	    margin-left: 15px;
+	}
+	
+	.el-icon-arrow-down {
+	    font-size: 12px;
 	}
 </style>

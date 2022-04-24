@@ -4,19 +4,59 @@
 			<el-page-header :icon="ArrowLeft" content="图书详情" @back="back()"/>
 		</div>
 		<div class="el-main">
-			<div class="cover">
-				<el-image :src="require('@/assets/img/' + proxy.book.book_img)" :fit="'cover'"/>
+			<div class="book_title">
+				{{proxy.book.book_title}}
 			</div>
-			<el-card class="box-card">
+			<div class="info">
+				<div class="subInfo">
+					<div class="cover">
+						<el-image :src="require('@/assets/img/' + proxy.book.book_img)" :fit="'cover'"/>
+					</div>
+					<div class="detail">
+						<span><p>作者:&nbsp;&nbsp;&nbsp;&nbsp;{{proxy.book.book_author}}</p></span>
+						<span><p>类型:&nbsp;&nbsp;&nbsp;&nbsp;{{proxy.book.category_name}}</p></span>
+						<span><p>页数:&nbsp;&nbsp;&nbsp;&nbsp;{{proxy.book.book_page}}</p></span>
+						<span><p>出版社:&nbsp;&nbsp;&nbsp;&nbsp;{{proxy.book.book_press}}</p></span>
+						<span><p>热门度:&nbsp;&nbsp;&nbsp;&nbsp;{{proxy.book.book_is_liked}}</p></span>
+						<span style="float: left;">分享到:&nbsp;&nbsp;&nbsp;&nbsp;<a href="http://service.weibo.com/share/share.php?appkey=&title=&url=&searchPic=false&style=simple" target="_blank">微博</a></span>
+						<br>
+					</div>
+				</div>
+				<div class="book_rate">
+					<span style="font-size: 25px;">评分</span>
+					<br>
+					<span style="font-size: 40px;">{{proxy.book.book_rate}}&nbsp;&nbsp;</span>
+					<span style="font-weight: 400;color: #A6A9AD;">{{proxy.book.book_rate_num}}人评价</span>
+					<span style="width: 20%;">
+						<el-rate
+							v-model="proxy.book.book_rate"
+							disabled
+							text-color="#ff9900"
+						/>
+					</span>
+					<span style="margin-top: 15%;">
+						<el-button ref="btn" type="text" @click="handleLike(proxy)" :disabled="dis">我要推荐</el-button>
+					</span>
+				</div>
+			</div>
+			<div class="desc">
+				<div class="desc_title">
+					内容简介
+				</div>
+				<div class="desc_content">
+					<p>{{proxy.book.book_desc}}</p>
+				</div>
+			</div>
+			<!-- <el-card class="box-card">
 			    <template #header>
 			        <div class="card-header">
 						<span>图书详情</span>
 			        </div>
-			    </template>
-				<div class="card-item">
+			    </template> -->
+				<!-- <div class="card-item">
 					<span><p>图书标题:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;《{{proxy.book.book_title}}》</p></span>
 					<span><p>图书作者:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{{proxy.book.book_author}}</p></span>
-					<span><p>图书类型:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{{proxy.book.book_category}}</p></span>					
+					<span><p>图书类型:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{{proxy.book.category_name}}</p></span>					
 					<span>
 						<div class="rate" style="display: flex;float: left;">
 							图书评分:&nbsp;&nbsp;&nbsp;
@@ -45,33 +85,57 @@
 					</span>
 					<br>
 				</div>
-			</el-card>
+			</el-card> -->
+			<span>
+				<el-button ref="btn" type="text" @click="handleWish(proxy)" :disabled="abled">加入愿望单</el-button>
+			</span>
 			<div class="demo-collapse">
-			    <el-collapse v-model="activeNames" @change="handleChange" style="width: 80%;margin-left: 10%;">
+			    <el-collapse v-model="activeNames" @change="handleChange" style="width: 80%;margin-left: 10%;margin-top: 1%;">
 			      <el-collapse-item title="查看评价" name="1">
-					<template  v-if="proxy.reviews"> 
-						<div class="UserReview">
-							<el-descriptions title="评价信息"
-								v-for="review in reviews" 
-								style="width: 60%;margin-left: 20%"
-								direction="vertical"
-								border>
-							<el-descriptions-item label="用户名" width="100px">{{review.username}}</el-descriptions-item>
-							<br>
-							<el-descriptions-item label="评价分数" width="150px">
-								<!-- <el-rate
+					<template  v-if="getReview"> 
+						<div class="UserReview" v-for="review in reviews.slice(0,3)" style="margin-left: 10%;;">
+							<div class="rate" style="display: flex;float: left;font-size: 15px;">
+								{{review.username}}
+							</div>
+							<div style="margin-top: 28px;margin-bottom: 15px;width: 18%;">
+								<el-rate
 									v-model="review.review_rate"
 									disabled
-									show-score
 									text-color="#ff9900"
-								/> -->
-								{{review.review_rate}}
-							</el-descriptions-item>
-							<el-descriptions-item label="评价内容">{{review.review_content}}</el-descriptions-item>
-							</el-descriptions>
+								/>
+							</div>
+							<div class="date" style="font-size: 15px;text-align: left;width: 40%;margin-bottom: 5%" :formatter="dateFormat">
+								{{review.review_content}}
+							</div>
 						</div>
+						<div v-if="proxy.reviews.length > 1">
+							<el-button type="text" style="margin-left: 16px" @click="drawer = true">显示更多</el-button>
+						</div>
+						<el-drawer
+							v-model="drawer"
+						    title="更多评论"
+						    :direction="direction"
+							size="40%"
+						>
+							<el-divider />
+						    <div class="UserReview" v-for="review in reviews" style="margin-left: 10%;;">
+						    	<div class="rate" style="display: flex;float: left;font-size: 15px;">
+						    		{{review.username}}
+						    	</div>
+						    	<div style="margin-top: 28px;margin-bottom: 15px;width: 35%;">
+						    		<el-rate
+						    			v-model="review.review_rate"
+						    			disabled
+						    			text-color="#ff9900"
+						    		/>
+						    	</div>
+						    	<div class="date" style="font-size: 15px;text-align: left;width: 40%;margin-bottom: 5%" :formatter="dateFormat">
+						    		{{review.review_content}}
+						    	</div>
+						    </div>
+						</el-drawer>
 					</template>
-					<template v-else-if="!proxy.reviews">
+					<template v-else-if="proxy.review.length == 0">
 						<div class="NoReview">
 							<p>暂无评价，赶快评价一下这本书吧！</p>
 						</div>
@@ -115,6 +179,9 @@
 						  	</el-descriptions>
 						  </div>
 					  </template>
+					  <span>
+					  	<el-button ref="btn" type="text" @click="handleWish(proxy)" :disabled="abled">加入愿望单</el-button>
+					  </span>
 			        </div>
 			      </el-collapse-item>
 			    </el-collapse>
@@ -124,15 +191,18 @@
 </template>
 
 <script>
-	import { ArrowLeft } from '@element-plus/icons'
+	import { ArrowLeft, ShoppingCart } from '@element-plus/icons'
 	import { getCurrentInstance } from 'vue';
 	import Qs from 'qs';
+	import moment from 'moment';
 	import Picture from '../components/Picture.vue'
 	import { ElNotification } from 'element-plus'
 	export default {
-		components: {ArrowLeft, Picture},
+		components: {ArrowLeft, Picture, ShoppingCart},
 		data() {
 			return {
+				drawer: false,
+				getReview: false,
 				getData: false,
 				myReview_content: '',
 				rate_value: 0,
@@ -171,24 +241,36 @@
 										'user_id': proxy.$store.state.user_id})
 			proxy.$axios.post('api/book/detail', book_id).then(res => {
 				proxy.book = res.data.data;
-				console.log('book' + proxy.reviews.length);
-				console.log('@/assets/img/'+ proxy.book.book_img);
-				console.log(res.data);
+				console.log('book' + proxy.reviews);
+				console.log(res.data.data);
 				proxy.getData = true;
 			});
 			proxy.$axios.post('api/review/byBook', book_id).then(res => {
-				if(res.data.code == 200)
 				proxy.reviews = res.data.data;
-				console.log('有没有'+res.data);
+				console.log('有没有'+proxy.reviews);
+				console.log('看看返回的码'+res.data.code);
 				console.log(!proxy.reviews)
+				if(res.data.code == 200) {
+					proxy.getReview = true
+				} else {
+					proxy.getReview = false
+				}
 			});
 			proxy.$axios.post('api/review/myReview', my_review).then(res => {
 				if(res.data.code == 200)
 				proxy.myReview = res.data.data;
-				console.log('我的有没有'+res.data);
+				console.log('我的有没有'+res.data.data);
 			});
 		},
 		methods: {
+			handleClose(done) {
+				
+			},
+			dateFormat:function(review_date) {
+			        var date = review_date;
+			        if(date == undefined){return ''};
+			        return moment(date).format("YYYY-MM-DD HH:mm:ss");
+			},
 			back() {
 				this.$router.push('/mainpage');
 			},
@@ -202,6 +284,19 @@
 						 ElNotification({
 						    title: 'Success',
 						    message: '推荐成功',
+						    type: 'success',
+						  })	  
+					}
+					this.dis = true;
+					console.log(res.data);
+				});
+				var shareData = Qs.stringify({'book_id': proxy.$store.state.book_id,
+											  'user_id': proxy.$store.state.user_id})
+				this.$axios.post('api/share/new', shareData).then(res => {
+					if(res.data.code == 200) {
+						 ElNotification({
+						    title: 'Success',
+						    message: '分享成功',
 						    type: 'success',
 						  })	  
 					}
@@ -251,6 +346,13 @@
 					}
 					console.log(res.data);
 				})
+				var book_id = Qs.stringify({'book_id': proxy.$store.state.book_id})
+				proxy.$axios.post('api/book/detail', book_id).then(res => {
+					proxy.book = res.data.data;
+					console.log('book' + proxy.reviews);
+					console.log(res.data.data);
+					proxy.getData = true;
+				});
 			}
 		}
 	}
@@ -262,14 +364,15 @@
 		margin-left: 5%;
 	}
 	.cover {
-		width: 20%;
-		height: 20%;
-		align-center: center;
-		margin-left: 37%;
-		margin-top: 5%;
+		width: 360px;
+		height: 400px;
+		margin-left: 235px;
+		margin-top: 0%;
 		margin-right: 0;
 		margin-bottom: 3%;
 		border-radius: 3px;
+		display: flex;
+		float: left;
 	}
 	.card-header {
 		display: flex;
@@ -290,5 +393,58 @@
 		width: 480px;
 		margin-left: 33.5%;
 		margin-bottom: 7%;
+	}
+	
+	.book_title {
+		margin-top: 2%;
+		margin-left: 13%;
+		text-align: left;
+		font-weight: bold;
+		font-size: 33px;
+	}
+	
+	.detail {
+		margin-top: 1%;
+		margin-bottom: 20%;
+		width: 30%;
+		text-align: left;
+		font-size: 17px;
+		
+	}
+	
+	.subInfo {
+		display: flex;
+		float: left;
+	}
+	
+	.info {
+		display: flex;
+		flex-direction: row;
+		justify-content: space-between;
+		margin: 0;
+		width: 100%;
+	}
+	
+	.book_rate {
+		border-left: 1px solid #eaeaea;
+		width: 30%;
+		height: 100%;
+		text-align: left;
+		padding-left: 3%;
+	}
+	
+	.desc_content {
+		width: 40%;
+		margin-left: 20%;
+		text-align: left;
+		text-indent: 35px;
+		margin-bottom: 3%;
+	}
+	
+	.desc_title {
+		margin-top: 2%;
+		text-align: left;
+		margin-left: 15%;
+		font-size: 25px;
 	}
 </style>
